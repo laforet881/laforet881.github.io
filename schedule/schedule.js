@@ -125,10 +125,26 @@ function cardTimes() {
     lunarMon = chineseLunar.format(lunarDate, "M");
     lunarDay = chineseLunar.format(lunarDate, "d");
 
-    const newYearDate = new Date("2026/02/17 00:00:00");
+    // 自动计算下一个除夕日期：正月初一前一天
+    let lunarYear = year;
+    let springFestival = chineseLunar.lunarToSolar(lunarYear, 1, 1);
+    // 如果今年的正月初一已过，则取明年的
+    if (springFestival <= now) {
+      lunarYear = year + 1;
+      springFestival = chineseLunar.lunarToSolar(lunarYear, 1, 1);
+    }
+    const newYearDate = new Date(springFestival.getTime() - 24 * 60 * 60 * 1000);
     const daysUntilNewYear = Math.floor(
       (newYearDate - now) / 1e3 / 60 / 60 / 24
     );
+    // 更新 DOM 显示的日期
+    const scheduleDateEl = document.getElementById("schedule-date");
+    if (scheduleDateEl) {
+      const ny = newYearDate.getFullYear();
+      const nm = String(newYearDate.getMonth() + 1).padStart(2, "0");
+      const nd = String(newYearDate.getDate()).padStart(2, "0");
+      scheduleDateEl.textContent = `${ny}-${nm}-${nd}`;
+    }
     asideTime = new Date(`${new Date().getFullYear()}/01/01 00:00:00`);
     asideDay = (now - asideTime) / 1e3 / 60 / 60 / 24;
     asideDayNum = Math.floor(asideDay);
